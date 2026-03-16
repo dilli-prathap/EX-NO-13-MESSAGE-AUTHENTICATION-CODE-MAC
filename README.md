@@ -78,6 +78,5 @@ int main()
 
 ## Output:
 
-
 ## Result:
 The program is executed successfully.
