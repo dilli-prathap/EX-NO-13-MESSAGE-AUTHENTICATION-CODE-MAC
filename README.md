@@ -29,54 +29,55 @@ To implement MESSAGE AUTHENTICATION CODE(MAC)
 #include <stdio.h>
 #include <string.h>
 
-int generateMAC(char message[], char key[])
-{
-    int i, mac = 0;
+#define MAC_SIZE 32 
 
-    // Concatenate key and message
-    char combined[200];
-    strcpy(combined, key);
-    strcat(combined, message);
-
-    // Simple hash calculation
-    for(i = 0; i < strlen(combined); i++)
-    {
-        mac = mac + combined[i];
+void computeMAC(const char *key, const char *message, char *mac) {
+    int key_len = strlen(key);
+    int msg_len = strlen(message);
+    
+    // XOR the key and message, repeating if necessary
+    for (int i = 0; i < MAC_SIZE; i++) {
+        mac[i] = key[i % key_len] ^ message[i % msg_len]; 
     }
-
-    return mac % 256;   // simple MAC value
+    mac[MAC_SIZE] = '\0'; 
 }
 
-int main()
-{
-    char message[100], key[100];
-    int mac, received_mac;
-
-    printf("Enter the message: ");
-    scanf("%s", message);
+int main() {
+    char key[100], message[100];
+    char mac[MAC_SIZE + 1]; 
+    char receivedMAC[MAC_SIZE + 1]; 
 
     printf("Enter the secret key: ");
     scanf("%s", key);
 
-    // Generate MAC
-    mac = generateMAC(message, key);
-    printf("Generated MAC: %d\n", mac);
+    printf("Enter the message: ");
+    scanf("%s", message);
 
-    // Verification
-    printf("Enter received MAC for verification: ");
-    scanf("%d", &received_mac);
+    computeMAC(key, message, mac);
 
-    if(mac == received_mac)
-        printf("Message is authentic and unchanged\n");
-    else
-        printf("Message authentication failed\n");
+    printf("Computed MAC (in hex): ");
+    for (int i = 0; i < MAC_SIZE; i++) {
+        printf("%02x", (unsigned char)mac[i]);
+    }
+    printf("\n");
+
+    printf("Enter the received MAC (as hex): ");
+    for (int i = 0; i < MAC_SIZE; i++) {
+        scanf("%02hhx", &receivedMAC[i]);
+    }
+
+    if (memcmp(mac, receivedMAC, MAC_SIZE) == 0) {
+        printf("MAC verification successful. Message is authentic.\n");
+    } else {
+        printf("MAC verification failed. Message is not authentic.\n");
+    }
 
     return 0;
 }
 ```
 ## Output
+<img width="1620" height="909" alt="Screenshot 2026-03-17 142635" src="https://github.com/user-attachments/assets/c83a6531-7004-4289-9120-bbd1185c3dd8" />
 
-![MAC Output](Screenshot%202026-03-16%20084534.png)
 
 ## Result
 The program is executed successfully.
